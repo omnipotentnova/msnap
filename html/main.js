@@ -40,7 +40,9 @@ function askQuestions() {
     return;
   }
 
-  recordAnswers();
+  if(!recordAnswers()) {
+    return;
+  }
   askedStack.push(globalQuestionId);
   globalQuestionId = nextQuestion();
   showQuestion();
@@ -48,7 +50,7 @@ function askQuestions() {
 
 function showQuestion() {
   // Remove the current question
-  $(".question").remove();
+  $("#question-form").remove();
 
   // If we're done display the results
   if(globalQuestionId == "DONE") {
@@ -59,33 +61,53 @@ function showQuestion() {
 
   // We're not done. Logic to show the question programatically
   var questionData = questions[globalQuestionId];
+  var $questionForm = $("<form id='question-form' action='#' method='get'>");
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
+    var $p = $("<p>");
     var field = questionData.fields[fieldNum];
-    var $newDiv = $("<div class='question'/>");
-    $newDiv.append($("<div class='label'/>").text(field.text));
-    $newDiv.append(
-      $("<div class='field'/>")
-        .append("<input type='text' id='question-" + field.name + "'/>"));
-    $("#questions").append($newDiv);
+    var questionId = "question-" + field.name;
+    $p.append($("<label for='" + questionId + "'>").text(field.text));
+
+    // Set up validation of types with jquery plugin
+    var validationClasses = [];
+    if(!("required" in field) || field.required) {
+      validationClasses.push("required");
+    }
+    switch(field.type) {
+      case "int":
+        validationClasses.push("digits");
+        break;
+
+      case "float":
+        validationClasses.push("number");
+        break;
+    }
+    var validationClass = validationClasses.join(" ");
+
+    $p.append($("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>"));
+    $questionForm.append($p);
   }
+  $questionForm.validate();
+  $("#questions").append($questionForm);
 }
 
 function showResults() {
   var $resultsTable = $("#resultsTable");
   for(var resultNum=0; resultNum < results.length; ++resultNum) {
     var result = results[resultNum];
-    alert("HI!");
     var $tr = $("<tr>");
-    alert("HI!!");
     $tr.append($("<td>").text(result.label));
-    alert("HI!!!");
     $tr.append($("<td>").text(result.text));
     $resultsTable.append($tr);
   }
   $resultsTable.show();
 }
 
+/*
+ * Return true if form entries validate.
+ */
 function recordAnswers() {
+  if(! $("#questions").validate().form()) return false;
   var questionData = questions[globalQuestionId];
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var field = questionData.fields[fieldNum];
@@ -93,6 +115,7 @@ function recordAnswers() {
     var type = field.type
     answers[globalQuestionId][field.name] = castAnswer(value, type, field);
   }
+  return true;
 }
 
 function nextQuestion() {
