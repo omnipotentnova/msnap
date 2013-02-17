@@ -27,25 +27,18 @@ function computeResults() {
 var answers = {};
 var results = [];
 var askedStack = [];
-var globalQuestionId;
+var globalQuestionId = firstQuestion;
 
 init();
-askQuestions();
+showQuestion();
 
 function askQuestions() {
 
-  if(askedStack.length == 0) {
-    globalQuestionId = firstQuestion;
-    showQuestion();
-    return;
-  }
-
-  if(!recordAnswers()) {
-    return;
-  }
+  recordAnswers();
   askedStack.push(globalQuestionId);
   globalQuestionId = nextQuestion();
   showQuestion();
+
 }
 
 function showQuestion() {
@@ -61,7 +54,7 @@ function showQuestion() {
 
   // We're not done. Logic to show the question programatically
   var questionData = questions[globalQuestionId];
-  var $questionForm = $("<form id='question-form' action='#' method='get'>");
+  var $questionForm = $("<form id='question-form' action='javascript:askQuestions()' method='get'>");
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var $p = $("<p>");
     var field = questionData.fields[fieldNum];
@@ -92,6 +85,12 @@ function showQuestion() {
 }
 
 function showResults() {
+
+  // Hide buttons
+  $(".back-button").hide();
+  $(".continue-button").hide();
+  $(".start-over-button").show();
+
   var $resultsTable = $("#resultsTable");
   for(var resultNum=0; resultNum < results.length; ++resultNum) {
     var result = results[resultNum];
@@ -103,11 +102,7 @@ function showResults() {
   $resultsTable.show();
 }
 
-/*
- * Return true if form entries validate.
- */
 function recordAnswers() {
-  if(! $("#questions").validate().form()) return false;
   var questionData = questions[globalQuestionId];
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var field = questionData.fields[fieldNum];
@@ -115,7 +110,6 @@ function recordAnswers() {
     var type = field.type
     answers[globalQuestionId][field.name] = castAnswer(value, type, field);
   }
-  return true;
 }
 
 function nextQuestion() {
@@ -123,7 +117,6 @@ function nextQuestion() {
 }
 
 function castAnswer(value, type, field) {
-  // TODO(kevin): Check if the value is allowed. Else print error.
     switch(type) {
       case "string":
         return value;
@@ -139,14 +132,21 @@ function castAnswer(value, type, field) {
     }
 }
 
+function restart() {
+  answers = {};
+  results = [];
+  $("#resultsTable").hide().children().remove();
+  init();
+  globalQuestionId = firstQuestion;
+  showQuestion();
+}
 
 function init() {
   $('.start-over-button')
     .click(function(e) {
       e.preventDefault();
-      clearResults();
-      askQuestions();
-    });
+      restart();
+    }).hide();
 
   $('.back-button')
     .click(function(e) {
@@ -157,13 +157,13 @@ function init() {
       }
       globalQuestionId = askedStack.pop();
       askQuestions();
-    });
+    }).show();
 
   $('.continue-button')
     .click(function(e) {
       e.preventDefault();
-      askQuestions();
-    });
+      $("#question-form").submit();
+    }).show();
 
   for(var prop in questions) {
     // Set up the dictionary which keeps track of the answers.
