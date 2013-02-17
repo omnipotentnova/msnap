@@ -1,8 +1,5 @@
 'use strict';
 
-var answers = {};
-var askedStack = [];
-var globalQuestionId;
 var firstQuestion = "income";
 var questions = {
   "income": {
@@ -19,6 +16,18 @@ var questions = {
     }
   }
 };
+
+function computeResults() {
+  results.push({"name": "myname", "label": "NAME", "text": answers.income.myname});
+}
+
+/*
+ * Everything after here should generally be left alone.
+ */
+var answers = {};
+var results = [];
+var askedStack = [];
+var globalQuestionId;
 
 init();
 askQuestions();
@@ -38,8 +47,18 @@ function askQuestions() {
 }
 
 function showQuestion() {
+  // Remove the current question
+  $(".question").remove();
+
+  // If we're done display the results
+  if(globalQuestionId == "DONE") {
+    computeResults();
+    showResults();
+    return;
+  }
+
+  // We're not done. Logic to show the question programatically
   var questionData = questions[globalQuestionId];
-  $("#questions").remove(".question")
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var field = questionData.fields[fieldNum];
     var $newDiv = $("<div class='question'/>");
@@ -49,6 +68,21 @@ function showQuestion() {
         .append("<input type='text' id='question-" + field.name + "'/>"));
     $("#questions").append($newDiv);
   }
+}
+
+function showResults() {
+  var $resultsTable = $("#resultsTable");
+  for(var resultNum=0; resultNum < results.length; ++resultNum) {
+    var result = results[resultNum];
+    alert("HI!");
+    var $tr = $("<tr>");
+    alert("HI!!");
+    $tr.append($("<td>").text(result.label));
+    alert("HI!!!");
+    $tr.append($("<td>").text(result.text));
+    $resultsTable.append($tr);
+  }
+  $resultsTable.show();
 }
 
 function recordAnswers() {
