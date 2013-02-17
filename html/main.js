@@ -4,6 +4,21 @@ var answers = {};
 var askedStack = [];
 var globalQuestionId;
 var firstQuestion = "income";
+var questions = {
+  "income": {
+    "fields" : [
+      {"name": "myname",
+       "type": "string",
+       "text": "What is your name?"},
+      {"name": "myint",
+       "type": "int",
+       "text": "What is your favorite color?"}
+    ],
+    "next": function() {
+      return "DONE";
+    }
+  }
+};
 
 init();
 askQuestions();
@@ -23,19 +38,26 @@ function askQuestions() {
 }
 
 function showQuestion() {
-  questionData = questions[globalQuestionId];
-  for(var field in questionData.fields) {
-    // Remove the current question
-    // Add this question
+  var questionData = questions[globalQuestionId];
+  $("#questions").remove(".question")
+  for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
+    var field = questionData.fields[fieldNum];
+    var $newDiv = $("<div class='question'/>");
+    $newDiv.append($("<div class='label'/>").text(field.text));
+    $newDiv.append(
+      $("<div class='field'/>")
+        .append("<input type='text' id='question-" + field.name + "'/>"));
+    $("#questions").append($newDiv);
   }
 }
 
 function recordAnswers() {
   var questionData = questions[globalQuestionId];
-  for(var field in questionData.fields) {
-    var value = $("#question-" + field).value();
-    var type = questionData.fields[field].type
-    answers[globalQuestionId][field] = castAnswer(value, type, field);
+  for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
+    var field = questionData.fields[fieldNum];
+    var value = $("#question-" + field.name).val();
+    var type = field.type
+    answers[globalQuestionId][field.name] = castAnswer(value, type, field);
   }
 }
 
@@ -45,30 +67,21 @@ function nextQuestion() {
 
 function castAnswer(value, type, field) {
   // TODO(kevin): Check if the value is allowed. Else print error.
-    switch(questionData.fields[field]) {
+    switch(type) {
       case "string":
-        answers[globalQuestionId][field] = value;
+        return value;
         break;
 
       case "int":
-        answers[globalQuestionId][field] = int(value);
+        return parseInt(value);
         break;
 
       case "float":
-        answers[globalQuestionId][field] = float(value);
+        return parseFloat(value);
         break;
     }
 }
 
-questions = {
-  "income": {
-    "fields" : [
-      {"name": "myname",
-       "type": "string",
-       "label": "What is your name?"}
-    ]
-  }
-};
 
 function init() {
   $('.start-over-button')
