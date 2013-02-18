@@ -1,6 +1,22 @@
 'use strict';
 
-var firstQuestion = "name"; // The key of the first question to be asked
+/*
+ * A simple library for creating a flipbook of questions to answer.
+ *
+ * @author Kevin Hayes Wilson and Trevor Summers Smith
+ * @date Feb 2013
+ */
+
+/*
+ * How to use:
+ *
+ * Your html file calling this should have a div called questions and a table
+ * called results. The questions will be filled in in the div and the results
+ * in the table.
+ *
+ * To add questions, you should make a variable called questions which looks
+ * like this:
+ * 
 var questions = { // The actual questions to be asked in json
   "name": {
     "fields": [
@@ -16,6 +32,7 @@ var questions = { // The actual questions to be asked in json
     "fields": [
       {"name": "myint",
        "type": "int",
+       "required": false,
        "text": "What is your favorite nonnegative integer?"}
     ],
     "next": function() {
@@ -23,20 +40,22 @@ var questions = { // The actual questions to be asked in json
     }
   }
 };
-
-/*
- * Actually compute the results from the answers to the questions.
- * Uses the answers associative array to get data and stores results to be
- * displayed in the results associative array.
- */
+ * The global variable firstQuestion should point to the first question to ask.
+ * The function next() should return the name of another question OR the string
+ * DONE to indicate that all of the form has been filled out.
+ *
+ * You should also implement a function called computeResults which will
+ * populate a list called results. For example:
+ *
 function computeResults() {
   results.push({"name": "myname", "label": "NAME", "text": answers.name.myname});
   results.push({"name": "myint", "label": "INT", "text": answers.int.myint});
 }
-
-/*
- * Everything after here should generally be left alone.
+ *
+ * The file which defines these should be sourced *before* this file as they
+ * are necessary for the init function.
  */
+
 var answers = {};
 var results = [];
 var askedStack = [];
