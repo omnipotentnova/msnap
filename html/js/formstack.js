@@ -110,10 +110,28 @@ function showQuestion() {
     }
     var validationClass = validationClasses.join(" ");
 
-    var $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
-    if(field.name in answerData && answerData[field.name] !== null)
-      $input.val(answerData[field.name]);
-    $p.append($input);
+    var $input;
+    switch(field.type) {
+      case "int":
+      case "string":
+      case "float":
+        var $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
+        if(field.name in answerData && answerData[field.name] !== null)
+          $input.val(answerData[field.name]);
+        $p.append($input);
+        break;
+
+      case "yesorno":
+        var $yes = $("<input type='radio' value='true' name='" + questionId + "'>").text("Yes");
+        var $no = $("<input type='radio' value='false' name='" + questionId + "'>").text("No");
+        if(field.name in answerData && answerData[field.name] !== null)
+          if(answerData[field.name])
+            $yes.attr("checked", "checked");
+          else
+            $no.attr("checked", "checked");
+        $p.append($yes).append($no);
+        break;
+    }
     $questionForm.append($p);
   }
   $questionForm.validate();
@@ -123,8 +141,8 @@ function showQuestion() {
 function showResults() {
 
   // Hide buttons
-  $(".back-button").hide();
   $(".continue-button").hide();
+  $(".back-button").hide();
   $(".start-over-button").show();
 
   var $resultsTable = $("#resultsTable");
@@ -142,9 +160,40 @@ function recordAnswers() {
   var questionData = questions[globalQuestionId];
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var field = questionData.fields[fieldNum];
-    var value = $("#question-" + field.name).val();
-    var type = field.type
-    answers[globalQuestionId][field.name] = castAnswer(value, type, field);
+    var type = field.type;
+    switch(field.type) {
+      case "string":
+        var value = $("#question-" + field.name).val();
+        if(value.length > 0)
+          answers[globalQuestionId][field.name] = value;
+        else
+          answers[globalQuestionId][field.name] = null;
+        break;
+
+      case "int":
+        var value = $("#question-" + field.name).val();
+        if(value.length > 0)
+          answers[globalQuestionId][field.name] = value;
+        else
+          answers[globalQuestionId][field.name] = null;
+        break;
+
+      case "float":
+        var value = $("#question-" + field.name).val();
+        if(value.length > 0)
+          answers[globalQuestionId][field.name] = parseFloat(value);
+        else
+          answers[globalQuestionId][field.name] = null;
+        break;
+
+      case "yesorno":
+        var value = $("input:radio[name=" + field.name + "]:checked").val();
+        if(value == "true")
+          answers[globalQuestionId][field.name] = true;
+        else
+          answers[globalQuestionId][field.name] = false;
+        break;
+    }
   }
 }
 
