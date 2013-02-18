@@ -1,7 +1,7 @@
 'use strict';
 
-var firstQuestion = "income";
-var questions = {
+var firstQuestion = "income"; // The key of the first question to be asked
+var questions = { // The actual questions to be asked in json
   "income": {
     "fields" : [
       {"name": "myname",
@@ -9,7 +9,7 @@ var questions = {
        "text": "What is your name?"},
       {"name": "myint",
        "type": "int",
-       "text": "What is your favorite color?"}
+       "text": "What is your favorite nonnegative integer?"}
     ],
     "next": function() {
       return "DONE";
@@ -17,6 +17,11 @@ var questions = {
   }
 };
 
+/*
+ * Actually compute the results from the answers to the questions.
+ * Uses the answers associative array to get data and stores results to be
+ * displayed in the results associative array.
+ */
 function computeResults() {
   results.push({"name": "myname", "label": "NAME", "text": answers.income.myname});
 }
@@ -54,6 +59,7 @@ function showQuestion() {
 
   // We're not done. Logic to show the question programatically
   var questionData = questions[globalQuestionId];
+  var answerData = answers[globalQuestionId]; // In case we hit back
   var $questionForm = $("<form id='question-form' action='javascript:askQuestions()' method='get'>");
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var $p = $("<p>");
@@ -77,7 +83,10 @@ function showQuestion() {
     }
     var validationClass = validationClasses.join(" ");
 
-    $p.append($("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>"));
+    $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
+    if(field in answerData)
+      $input.val(answerData[field]);
+    $p.append();
     $questionForm.append($p);
   }
   $questionForm.validate();
@@ -117,19 +126,19 @@ function nextQuestion() {
 }
 
 function castAnswer(value, type, field) {
-    switch(type) {
-      case "string":
-        return value;
-        break;
+  switch(type) {
+    case "string":
+      return value;
+      break;
 
-      case "int":
-        return parseInt(value);
-        break;
+    case "int":
+      return parseInt(value);
+      break;
 
-      case "float":
-        return parseFloat(value);
-        break;
-    }
+    case "float":
+      return parseFloat(value);
+      break;
+  }
 }
 
 function restart() {
@@ -155,8 +164,9 @@ function init() {
         showError('.back-button', "Already at the beginning");
         return;
       }
+      recordAnswers();
       globalQuestionId = askedStack.pop();
-      askQuestions();
+      showQuestion();
     }).show();
 
   $('.continue-button')
