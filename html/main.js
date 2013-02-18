@@ -1,12 +1,19 @@
 'use strict';
 
-var firstQuestion = "income"; // The key of the first question to be asked
+var firstQuestion = "name"; // The key of the first question to be asked
 var questions = { // The actual questions to be asked in json
-  "income": {
-    "fields" : [
+  "name": {
+    "fields": [
       {"name": "myname",
        "type": "string",
-       "text": "What is your name?"},
+       "text": "What is your name?"}
+    ],
+    "next": function() {
+      return "int";
+    }
+  },
+  "int": {
+    "fields": [
       {"name": "myint",
        "type": "int",
        "text": "What is your favorite nonnegative integer?"}
@@ -23,7 +30,8 @@ var questions = { // The actual questions to be asked in json
  * displayed in the results associative array.
  */
 function computeResults() {
-  results.push({"name": "myname", "label": "NAME", "text": answers.income.myname});
+  results.push({"name": "myname", "label": "NAME", "text": answers.name.myname});
+  results.push({"name": "myint", "label": "INT", "text": answers.int.myint});
 }
 
 /*
@@ -60,6 +68,7 @@ function showQuestion() {
   // We're not done. Logic to show the question programatically
   var questionData = questions[globalQuestionId];
   var answerData = answers[globalQuestionId]; // In case we hit back
+
   var $questionForm = $("<form id='question-form' action='javascript:askQuestions()' method='get'>");
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var $p = $("<p>");
@@ -74,8 +83,7 @@ function showQuestion() {
     }
     switch(field.type) {
       case "int":
-        validationClasses.push("digits");
-        break;
+        validationClasses.push("digits"); break;
 
       case "float":
         validationClasses.push("number");
@@ -83,10 +91,10 @@ function showQuestion() {
     }
     var validationClass = validationClasses.join(" ");
 
-    $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
-    if(field in answerData)
-      $input.val(answerData[field]);
-    $p.append();
+    var $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
+    if(field.name in answerData && answerData[field.name] !== null)
+      $input.val(answerData[field.name]);
+    $p.append($input);
     $questionForm.append($p);
   }
   $questionForm.validate();
@@ -129,15 +137,16 @@ function castAnswer(value, type, field) {
   switch(type) {
     case "string":
       return value;
-      break;
 
     case "int":
-      return parseInt(value);
-      break;
+      if(value.length > 0)
+        return parseInt(value);
+      return null;
 
     case "float":
-      return parseFloat(value);
-      break;
+      if(value.length > 0)
+        return parseFloat(value);
+      return null;
   }
 }
 
@@ -160,18 +169,18 @@ function init() {
   $('.back-button')
     .click(function(e) {
       e.preventDefault();
-      if(askedStack.length == 0) {
-        showError('.back-button', "Already at the beginning");
-        return;
-      }
       recordAnswers();
       globalQuestionId = askedStack.pop();
+      if(askedStack.length == 0) {
+        $('.back-button').hide();
+      }
       showQuestion();
-    }).show();
+    }).hide();
 
   $('.continue-button')
     .click(function(e) {
       e.preventDefault();
+      $(".back-button").show();
       $("#question-form").submit();
     }).show();
 
