@@ -11,6 +11,6 @@ prescreening people for the Supplemental Nutrition Assistance Program (SNAP).
 Right now, this is just a static website, so you can simply upload the contents
 of the html folder to your favorite web host and call it a day.
 
-## Where is it now?
-
-_to fill in_
+This repo currently contains an app.yaml ready to deploy to Google's App
+Engine. As it is a static site it has no actual ties to App Engine, other than
+its app.yaml.
