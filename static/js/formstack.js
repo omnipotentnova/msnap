@@ -122,8 +122,8 @@ function showQuestion() {
         break;
 
       case "yesorno":
-        var $yes = $("<input type='radio' value='true' name='" + questionId + "'>").text("Yes");
-        var $no = $("<input type='radio' value='false' name='" + questionId + "'>").text("No");
+        var $yes = $("<label class='checkbox'><input type='radio' value='true' name='" + questionId + "'>Yes</label>")
+        var $no = $("<label class='checkbox'><input type='radio' value='false' name='" + questionId + "'>No</label>");
         if(field.name in answerData && answerData[field.name] !== null)
           if(answerData[field.name])
             $yes.attr("checked", "checked");
