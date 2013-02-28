@@ -6,6 +6,10 @@ threadsafe: true
 
 # For now, everything goes to index.html
 handlers:
-  - url: /.*
+  - url: /?
     static_files: static/index.html
-    upload: static/index\.html
+    upload: static/index.html
+
+  - url: /(.+)
+    static_files: static/\1
+    upload: static/(.*)
