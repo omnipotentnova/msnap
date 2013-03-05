@@ -122,14 +122,47 @@ function showQuestion() {
         break;
 
       case "yesorno":
-        var $yes = $("<label class='checkbox'><input type='radio' value='true' name='" + questionId + "'>Yes</label>")
-        var $no = $("<label class='checkbox'><input type='radio' value='false' name='" + questionId + "'>No</label>");
+        var labelHTML = "<label class='checkbox'>";
+
+        var yesHTML = labelHTML;
+        yesHTML += "<input type='radio' ";
+        yesHTML += "value='true' ";
+        yesHTML += "name='" + questionId + "' ";
+        yesHTML += "class='" + validationClass + "'";
+        yesHTML += ">Yes</label>";
+        var $yes = $(yesHTML);
+
+        var noHTML = labelHTML;
+        noHTML += "<input type='radio' ";
+        noHTML += "value='true' ";
+        noHTML += "name='" + questionId + "' ";
+        noHTML += "class='" + validationClass + "'";
+        noHTML += ">No</label>";
+        var $no = $(noHTML);
+
         if(field.name in answerData && answerData[field.name] !== null)
           if(answerData[field.name])
             $yes.attr("checked", "checked");
           else
             $no.attr("checked", "checked");
         $p.append($yes).append($no);
+        break;
+
+      case "radio":
+        for(var optionIdx = 0; optionIdx < field.radioOptions.length; ++optionIdx) {
+          var optionName = field.radioOptions[optionIdx];
+          var radioString = "<label class='checkbox'>";
+          radioString += "<input type='radio' ";
+          radioString += "value='" + optionName + "' ";
+          radioString += "name='" + questionId + "'>";
+          radioString += optionName;
+          radioString += "</label>";
+          var $radioButton = $(radioString);
+          if(field.name in answerData && answerData[field.name] !== null)
+            if(answerData[field.name] == optionName)
+              $radioButton.attr("checked", "checked");
+          $p.append($radioButton);
+        }
         break;
     }
     $questionForm.append($p);
@@ -248,7 +281,8 @@ function init() {
   $('.continue-button')
     .click(function(e) {
       e.preventDefault();
-      $(".back-button").show();
+      if($("#question-form").valid())
+        $(".back-button").show();
       $("#question-form").submit();
     }).show();
 

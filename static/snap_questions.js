@@ -42,25 +42,13 @@ var questions = { // The actual questions to be asked in json
       return "income";
     }
   },
-  "howOften": {
-    "fields": [
-      {"name": "howOften",
-       "type": "radio",
-       "required": true",
-       "How often are you paid?"}
-    ],
-    "next": function() {
-        return "income"; 
-      }
-    }
-  },
   "income": {
     "fields": [
       {"name": "howOften",
        "type": "radio",
        "required": true,
        "text": "How often are you paid?",
-       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]}
+       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]},
       {"name": "check1",
        "type": "float",
        "required": false,
@@ -68,11 +56,11 @@ var questions = { // The actual questions to be asked in json
       {"name": "check2",
        "type": "float",
        "required": false,
-       "text": "Your second paycheck?"}
+       "text": "Your second paycheck?"},
       {"name": "check3",
        "type": "float",
        "required": false,
-       "text": "Your third paycheck?"}
+       "text": "Your third paycheck?"},
       {"name": "check4",
        "type": "float",
        "required": false,
@@ -88,7 +76,7 @@ var questions = { // The actual questions to be asked in json
        "type": "radio",
        "required": true,
        "text": "How often do you receive unearned income, e.g., SSI, TANF, child support, unemployment, social security?",
-       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]}
+       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]},
       {"name": "check1",
        "type": "float",
        "required": false,
@@ -96,11 +84,11 @@ var questions = { // The actual questions to be asked in json
       {"name": "check2",
        "type": "float",
        "required": false,
-       "text": "Your second check?"}
+       "text": "Your second check?"},
       {"name": "check3",
        "type": "float",
        "required": false,
-       "text": "Your third check?"}
+       "text": "Your third check?"},
       {"name": "check4",
        "type": "float",
        "required": false,
@@ -190,15 +178,17 @@ function getPropertyOrZero(obj, prop) {
 function computeResults() {
   var earnedIncome = 0.0;
   var unearnedIncome = 0.0;
-  for(i=1; i<5; ++i) {
-    checkName = 'check' + i;
+  for(var i=1; i<5; ++i) {
+    var checkName = 'check' + i;
     earnedIncome += getPropertyOrZero(answers.income, checkName);
     unearnedIncome += getPropertyOrZero(answers.unearned, checkName);
   }
-
-  var deductions = 0.0;
-  deductions +=   deductions += 
-  deductions += getPropertyOrZero(answers.dependents, 'medicalExpenses');
+  if(answers.income.hasOwnProperty('howOften') && 
+       (answers.income.howOften == 'Weekly' || answers.income.howOften == 'Biweekly'))
+    earnedIncome *= 13/12;
+  if(answers.unearned.hasOwnProperty('howOften') && 
+       (answers.unearned.howOften == 'Weekly' || answers.unearned.howOften == 'Biweekly'))
+    unearnedIncome *= 13/12;
 
   var adjustedIncome = 0.0;
   adjustedIncome += 0.8 * earnedIncome;
@@ -231,7 +221,7 @@ function computeResults() {
     excessShelter = 0.0;
 
   if(!answers.people.elderlyOrDisabled)
-    if(excessShleter > 469)
+    if(excessShelter > 469)
       excessShelter = 469;
 
   var netIncome = adjustedIncome - excessShelter;
