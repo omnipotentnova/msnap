@@ -105,6 +105,7 @@ function showQuestion() {
         validationClasses.push("digits"); break;
 
       case "float":
+      case "usd":
         validationClasses.push("number");
         break;
     }
@@ -115,10 +116,16 @@ function showQuestion() {
       case "int":
       case "string":
       case "float":
+      case "usd":
         var $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
         if(field.name in answerData && answerData[field.name] !== null)
           $input.val(answerData[field.name]);
         $p.append($input);
+	// Add a dollar sign to the input box if it is usd
+	if (field.type == "usd") {
+	    $input.wrap("<div class='input-prepend' />");
+	    $input.before("<span class='add-on'>$</span>");
+	}
         break;
 
       case "yesorno":
@@ -224,6 +231,7 @@ function recordAnswers() {
         break;
 
       case "float":
+      case "usd":
         var value = $("#question-" + field.name).val();
         if(value.length > 0)
           answers[globalQuestionId][field.name] = parseFloat(value);
@@ -264,6 +272,7 @@ function castAnswer(value, type, field) {
       return null;
 
     case "float":
+    case "usd":
       if(value.length > 0)
         return parseFloat(value);
       return null;
