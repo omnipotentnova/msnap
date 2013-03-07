@@ -7,6 +7,9 @@ var CONSTANTS = {
   ],
   "maximumMonthlyBenefit": [ // Maximum SNAP benefit for a household of size (key)
     0, 200, 367, 526, 668, 793, 952, 1052, 1202, 1352, 1502, 1652, 1802
+  ],
+  "standardDeduction": [
+    0, 149, 149, 149, 160, 187, 214, 214, 214, 214, 214, 214, 214
   ]
 };
 
@@ -165,8 +168,8 @@ var questions = { // The actual questions to be asked in json
  * @return
  **/
 function getPropertyOrZero(obj, prop) {
-  if(obj.hasOwnProperty(prop))
-    return obj.hasOwnProperty[prop];
+  if(obj.hasOwnProperty(prop) && obj[prop] !== null)
+    return obj[prop];
   return 0;
 }
 
@@ -196,6 +199,7 @@ function computeResults() {
   adjustedIncome += unearnedIncome;
   adjustedIncome -= getPropertyOrZero(answers.dependents, 'dependentCare');
   adjustedIncome -= getPropertyOrZero(answers.dependents, 'childSupport');
+  adjustedIncome -= CONSTANTS.standardDeduction[numberInHousehold];
 
   var medicalExpenses = getPropertyOrZero(answers.dependents, 'medicalExpenses');
   if(medicalExpenses != 0) medicalExpenses -= 35;
