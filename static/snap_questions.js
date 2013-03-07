@@ -7,6 +7,9 @@ var CONSTANTS = {
   ],
   "maximumMonthlyBenefit": [ // Maximum SNAP benefit for a household of size (key)
     0, 200, 367, 526, 668, 793, 952, 1052, 1202, 1352, 1502, 1652, 1802
+  ],
+  "standardDeduction": [
+    0, 149, 149, 149, 160, 187, 214, 214, 214, 214, 214, 214, 214
   ]
 };
 
@@ -165,8 +168,8 @@ var questions = { // The actual questions to be asked in json
  * @return
  **/
 function getPropertyOrZero(obj, prop) {
-  if(obj.hasOwnProperty(prop))
-    return obj.hasOwnProperty[prop];
+  if(obj.hasOwnProperty(prop) && obj[prop] !== null)
+    return obj[prop];
   return 0;
 }
 
@@ -176,6 +179,7 @@ function getPropertyOrZero(obj, prop) {
  * displayed in the results associative array.
  */
 function computeResults() {
+  var numberInHousehold = answers.people.totalNumber;
   var earnedIncome = 0.0;
   var unearnedIncome = 0.0;
   for(var i=1; i<5; ++i) {
@@ -195,6 +199,7 @@ function computeResults() {
   adjustedIncome += unearnedIncome;
   adjustedIncome -= getPropertyOrZero(answers.dependents, 'dependentCare');
   adjustedIncome -= getPropertyOrZero(answers.dependents, 'childSupport');
+  adjustedIncome -= CONSTANTS.standardDeduction[numberInHousehold];
 
   var medicalExpenses = getPropertyOrZero(answers.dependents, 'medicalExpenses');
   if(medicalExpenses != 0) medicalExpenses -= 35;
@@ -225,6 +230,52 @@ function computeResults() {
       excessShelter = 469;
 
   var netIncome = adjustedIncome - excessShelter;
-  results.push({"name": "peopleInHousehold", "label": "PEEPS", "text": answers.people.totalNumber});
-  results.push({"name": "elderlyOrDisabled", "label": "HELP", "text": answers.people.elderlyOrDisabled});
+  var totalMinusChildSupport = earnedIncome + unearnedIncome;
+  totalMinusChildSupport -= getPropertyOrZero(answers.dependents, 
+                                              'childSupport');
+
+  var neitherDEnorDep = (totalMinusChildSupport < 
+                      1.3 * CONSTANTS.poverty[numberInHousehold]);
+  var eitherDEorDep = (totalMinusChildSupport < 
+                      2.0 * CONSTANTS.poverty[numberInHousehold]);
+  var justDE = (netIncome < CONSTANTS.poverty[numberInHousehold]);
+
+  var eligible = false;
+  if(neitherDEnorDep ||
+    ((answers.people.elderlyOrDisabled || answers.people.disabledCare)
+        && eitherDEorDep) ||
+    (answers.people.elderlyOrDisabled && justDE)) {
+    eligible = true;
+  }
+
+  var estimatedMonthlyBenefit = 0.0;
+  if(CONSTANTS.maximumMonthlyBenefit[numberInHousehold] - 0.3 * netIncome < 16 && eligible) {
+    estimatedMonthlyBenefit = 16.0;
+  } else {
+    if(netIncome < 0) {
+      estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit[numberInHousehold];
+    } else {
+      if(eligible) {
+        estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit[numberInHousehold] - 0.3 * netIncome;
+      }
+    }
+  }
+
+  var expeditedService = false;
+  if(answers.resources.totalResources < 100 && earnedIncome + unearnedIncome < 150) {
+    expeditedService = true;
+  }
+  if(answers.resources.totalResources + earnedIncome + unearnedIncome < getPropertyOrZero(answers.shelter, 'rent') + sua) {
+    expeditedService = true;
+  }
+  results.push({"name": "eligible", 
+                "label": "Is client eligible?", 
+                "text": eligible ? "Yes" : "No"});
+  results.push({"name": "expedited",
+                "label": "Is client eligible for expedited service?",
+                "text": expeditedService ? "Yes" : "No"});
+  results.push({"name": "estimate",
+                "label": "Estimated monthly benefit",
+                "text": estimatedMonthlyBenefit});
+
 }
