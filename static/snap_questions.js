@@ -179,7 +179,7 @@ function getPropertyOrZero(obj, prop) {
  * displayed in the results associative array.
  */
 function computeResults() {
-  var numberInHousehold = answers.
+  var numberInHousehold = answers.people.totalNumber;
   var earnedIncome = 0.0;
   var unearnedIncome = 0.0;
   for(var i=1; i<5; ++i) {
@@ -232,13 +232,13 @@ function computeResults() {
   var netIncome = adjustedIncome - excessShelter;
   var totalMinusChildSupport = earnedIncome + unearnedIncome;
   totalMinusChildSupport -= getPropertyOrZero(answers.dependents, 
-                                              'childSupport'));
+                                              'childSupport');
 
   var neitherDEnorDep = (totalMinusChildSupport < 
-                      1.3 * CONSTANTS.poverty[answers.people.totalNumber]);
+                      1.3 * CONSTANTS.poverty[numberInHousehold]);
   var eitherDEorDep = (totalMinusChildSupport < 
-                      2.0 * CONSTANTS.poverty[answers.people.totalNumber]);
-  var justDE = (netIncome < CONSTANTS.poverty[answers.people.totalNumber]);
+                      2.0 * CONSTANTS.poverty[numberInHousehold]);
+  var justDE = (netIncome < CONSTANTS.poverty[numberInHousehold]);
 
   var eligible = false;
   if(neitherDEnorDep ||
@@ -249,23 +249,23 @@ function computeResults() {
   }
 
   var estimatedMonthlyBenefit = 0.0;
-  if(CONSTANTS.maximumMonthlyBenefit - 0.3 * netIncome < 16 && eligible) {
+  if(CONSTANTS.maximumMonthlyBenefit[numberInHousehold] - 0.3 * netIncome < 16 && eligible) {
     estimatedMonthlyBenefit = 16.0;
   } else {
     if(netIncome < 0) {
-      estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit;
+      estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit[numberInHousehold];
     } else {
       if(eligible) {
-        estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit - 0.3 * netIncome;
+        estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit[numberInHousehold] - 0.3 * netIncome;
       }
     }
   }
 
   var expeditedService = false;
-  if(totalResources < 100 && earnedIncome + unearnedIncome < 150) {
+  if(answers.resources.totalResources < 100 && earnedIncome + unearnedIncome < 150) {
     expeditedService = true;
   }
-  if(totalResources + earnedIncome + unearnedIncome < rent + sua) {
+  if(answers.resources.totalResources + earnedIncome + unearnedIncome < getPropertyOrZero(answers.shelter, 'rent') + sua) {
     expeditedService = true;
   }
   results.push({"name": "eligible", 
