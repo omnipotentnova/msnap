@@ -122,30 +122,35 @@ function showQuestion() {
         break;
 
       case "yesorno":
-        var labelHTML = "<label class='checkbox'>";
-
-        var yesHTML = labelHTML;
+	// Build up the input box so that we can selectively turn it on or off
+	// Once that is done add the label and yes/no text elements.
+        var yesHTML = '';
         yesHTML += "<input type='radio' ";
         yesHTML += "value='true' ";
         yesHTML += "name='" + questionId + "' ";
-        yesHTML += "class='" + validationClass + "'";
-        yesHTML += ">Yes</label>";
+        yesHTML += "class='" + validationClass + "' />";
         var $yes = $(yesHTML);
 
-        var noHTML = labelHTML;
+        var noHTML = '';
         noHTML += "<input type='radio' ";
-        noHTML += "value='true' ";
+        noHTML += "value='false' ";
         noHTML += "name='" + questionId + "' ";
-        noHTML += "class='" + validationClass + "'";
-        noHTML += ">No</label>";
+        noHTML += "class='" + validationClass + "' />";
         var $no = $(noHTML);
 
-        if(field.name in answerData && answerData[field.name] !== null)
-          if(answerData[field.name])
+        if(field.name in answerData && answerData[field.name] !== null) {
+	  if(answerData[field.name] == true) {
             $yes.attr("checked", "checked");
-          else
+	  }
+          else {
             $no.attr("checked", "checked");
+	  }
+	}
         $p.append($yes).append($no);
+	$yes.wrap("<label class='checkbox'/>");
+	$yes.after("Yes");
+	$no.wrap("<label class='checkbox'/>");
+	$no.after("No");
         break;
 
       case "radio":
@@ -220,7 +225,8 @@ function recordAnswers() {
         break;
 
       case "yesorno":
-        var value = $("input:radio[name=" + field.name + "]:checked").val();
+	var itemName = 'question-' + field.name;
+	var value = $("input[type=radio][name='" + itemName + "']:checked").val();
         if(value == "true")
           answers[globalQuestionId][field.name] = true;
         else
