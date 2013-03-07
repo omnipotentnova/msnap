@@ -176,6 +176,7 @@ function getPropertyOrZero(obj, prop) {
  * displayed in the results associative array.
  */
 function computeResults() {
+  var numberInHousehold = answers.
   var earnedIncome = 0.0;
   var unearnedIncome = 0.0;
   for(var i=1; i<5; ++i) {
@@ -225,6 +226,52 @@ function computeResults() {
       excessShelter = 469;
 
   var netIncome = adjustedIncome - excessShelter;
-  results.push({"name": "peopleInHousehold", "label": "PEEPS", "text": answers.people.totalNumber});
-  results.push({"name": "elderlyOrDisabled", "label": "HELP", "text": answers.people.elderlyOrDisabled});
+  var totalMinusChildSupport = earnedIncome + unearnedIncome;
+  totalMinusChildSupport -= getPropertyOrZero(answers.dependents, 
+                                              'childSupport'));
+
+  var neitherDEnorDep = (totalMinusChildSupport < 
+                      1.3 * CONSTANTS.poverty[answers.people.totalNumber]);
+  var eitherDEorDep = (totalMinusChildSupport < 
+                      2.0 * CONSTANTS.poverty[answers.people.totalNumber]);
+  var justDE = (netIncome < CONSTANTS.poverty[answers.people.totalNumber]);
+
+  var eligible = false;
+  if(neitherDEnorDep ||
+    ((answers.people.elderlyOrDisabled || answers.people.disabledCare)
+        && eitherDEorDep) ||
+    (answers.people.elderlyOrDisabled && justDE)) {
+    eligible = true;
+  }
+
+  var estimatedMonthlyBenefit = 0.0;
+  if(CONSTANTS.maximumMonthlyBenefit - 0.3 * netIncome < 16 && eligible) {
+    estimatedMonthlyBenefit = 16.0;
+  } else {
+    if(netIncome < 0) {
+      estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit;
+    } else {
+      if(eligible) {
+        estimatedMonthlyBenefit = CONSTANTS.maximumMonthlyBenefit - 0.3 * netIncome;
+      }
+    }
+  }
+
+  var expeditedService = false;
+  if(totalResources < 100 && earnedIncome + unearnedIncome < 150) {
+    expeditedService = true;
+  }
+  if(totalResources + earnedIncome + unearnedIncome < rent + sua) {
+    expeditedService = true;
+  }
+  results.push({"name": "eligible", 
+                "label": "Is client eligible?", 
+                "text": eligible ? "Yes" : "No"});
+  results.push({"name": "expedited",
+                "label": "Is client eligible for expedited service?",
+                "text": expeditedService ? "Yes" : "No"});
+  results.push({"name": "estimate",
+                "label": "Estimated monthly benefit",
+                "text": estimatedMonthlyBenefit});
+
 }
