@@ -156,17 +156,21 @@ function showQuestion() {
       case "radio":
         for(var optionIdx = 0; optionIdx < field.radioOptions.length; ++optionIdx) {
           var optionName = field.radioOptions[optionIdx];
-          var radioString = "<label class='checkbox'>";
+	  // Build up the input box so that we can selectively turn it on or off
+	  // Once that is done add the label and option value text elements.
+          var radioString = '';
           radioString += "<input type='radio' ";
           radioString += "value='" + optionName + "' ";
-          radioString += "name='" + questionId + "'>";
-          radioString += optionName;
-          radioString += "</label>";
+          radioString += "name='" + questionId + "'/>";
           var $radioButton = $(radioString);
-          if(field.name in answerData && answerData[field.name] !== null)
-            if(answerData[field.name] == optionName)
+          if(field.name in answerData && answerData[field.name] !== null) {
+	    if(answerData[field.name] == optionName) {
               $radioButton.attr("checked", "checked");
+	    }
+	  }
           $p.append($radioButton);
+	  $radioButton.wrap("<label class='checkbox'>");
+	  $radioButton.after(optionName);
         }
         break;
     }
@@ -231,6 +235,12 @@ function recordAnswers() {
           answers[globalQuestionId][field.name] = true;
         else
           answers[globalQuestionId][field.name] = false;
+        break;
+
+      case "radio":
+	var itemName = 'question-' + field.name;
+	var value = $("input[type=radio][name='" + itemName + "']:checked").val();
+        answers[globalQuestionId][field.name] = value;
         break;
     }
   }
