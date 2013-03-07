@@ -147,6 +147,9 @@ function showQuestion() {
 	  }
 	}
         $p.append($yes).append($no);
+	// Add jquery-validation error placeholder (displays errors for
+	// both radio buttons
+	$yes.before('<div id="' + questionId + '-error"><label for="' + questionId + '" class="error" generated="true"></label><div>');
 	$yes.wrap("<label class='checkbox'/>");
 	$yes.after("Yes");
 	$no.wrap("<label class='checkbox'/>");
