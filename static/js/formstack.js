@@ -208,25 +208,48 @@ function showQuestion() {
 
 
       case "radio":
+        // First put together the hidden input field for the form
+        var hiddenId = sprintf("%s-hidden", questionId);
+        var hiddenHTML = sprintf(
+          "<input type='hidden' value='' name='%s' id='%s' class='%s' />",
+          questionId, hiddenId, validationClass);
+
+        var $hidden = $(hiddenHTML);
+        $p.append($hidden);
+
+        // The wrapper
+        var wrapperHTML = "<div class='btn-group' data-toggle='buttons-radio'>";
+        var $wrapper = $(wrapperHTML);
+
+        // Put together the options.... 
         for(var optionIdx = 0; optionIdx < field.radioOptions.length; ++optionIdx) {
           var optionName = field.radioOptions[optionIdx];
-	  // Build up the input box so that we can selectively turn it on or off
-	  // Once that is done add the label and option value text elements.
-          var radioString = '';
-          radioString += "<input type='radio' ";
-          radioString += "value='" + optionName + "' ";
-          radioString += "name='" + questionId + "'/>";
-          var $radioButton = $(radioString);
-          if(field.name in answerData && answerData[field.name] !== null) {
-	    if(answerData[field.name] == optionName) {
-              $radioButton.attr("checked", "checked");
-	    }
-	  }
-          $p.append($radioButton);
-	  $radioButton.wrap("<label class='checkbox'>");
-	  $radioButton.after(optionName);
+          var optionId = sprintf("%s-%s", questionId, optionName);
+          var buttonHTML = sprintf("<button type='button' id='%s'>", optionId);
+          var $button = $(buttonHTML)
+                           .addClass('btn')
+                           .addClass('btn-primary')
+                           .addClass(questionId)
+                           .text(optionName);
+          $button.click(function() {
+            // Ugly hack because variable resolution seems broken in JS....
+            var thisId = $(this).attr('id');
+            var prefix = thisId.substr(0, thisId.lastIndexOf('-'));
+            $("." + prefix).removeClass('active');
+            $(this).addClass('active');
+            $("#" + prefix + "-hidden").val(optionName);
+          });
+
+        if(field.name in answerData && answerData[field.name] !== null) {
+	      if(answerData[field.name] == optionName) {
+            $button.addClass('active');
+            $hidden.val(optionName);
+	      }
         }
-        break;
+        $p.append($button);
+      }
+      break;
+
     }
     $questionForm.append($p);
   }
