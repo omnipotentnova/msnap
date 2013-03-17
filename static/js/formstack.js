@@ -141,39 +141,71 @@ function showQuestion() {
         break;
 
       case "yesorno":
-	// Build up the input box so that we can selectively turn it on or off
-	// Once that is done add the label and yes/no text elements.
-        var yesHTML = '';
-        yesHTML += "<input type='radio' ";
-        yesHTML += "value='true' ";
-        yesHTML += "name='" + questionId + "' ";
-        yesHTML += "class='" + validationClass + "' />";
-        var $yes = $(yesHTML);
+        // First put together the hidden input field for the form
+        var hiddenId = sprintf("%s-hidden", questionId);
+        var hiddenHTML = sprintf(
+          "<input type='hidden' value='' name='%s' id='%s' class='%s' />",
+          questionId, hiddenId, validationClass);
 
-        var noHTML = '';
-        noHTML += "<input type='radio' ";
-        noHTML += "value='false' ";
-        noHTML += "name='" + questionId + "' ";
-        noHTML += "class='" + validationClass + "' />";
-        var $no = $(noHTML);
+        var $hidden = $(hiddenHTML);
+        $p.append($hidden);
 
-        if(field.name in answerData && answerData[field.name] !== null) {
-	  if(answerData[field.name] == true) {
-            $yes.attr("checked", "checked");
-	  }
-          else {
-            $no.attr("checked", "checked");
-	  }
-	}
+        // The wrapper
+        var wrapperHTML = "<div class='btn-group' data-toggle='buttons-radio'>";
+        var $wrapper = $(wrapperHTML);
+
+        // Yes and No
+        var yesId = sprintf("%s-yes", questionId);
+        var yesHTML = sprintf("<button type='button' id='%s'>", yesId);
+        var $yes = $(yesHTML).addClass('btn').addClass('btn-primary');
+        $yes.text("Yes");
+        $yes.click(function() {
+          // Ugly hack because variable resolution seems broken in JS....
+          var thisId = $(this).attr('id');
+          var prefix = thisId.substr(0, thisId.lastIndexOf('-'));
+          $("#" + prefix + "-hidden").val('true');
+          $("#" + prefix + "-no").removeClass('active');
+          $("#" + prefix + "-yes").addClass('active');
+        });
+
+        var noId = sprintf("%s-no", questionId);
+        var noHTML = sprintf("<button type='button' id='%s'>", noId);
+        var $no = $(noHTML).addClass('btn').addClass('btn-primary');
+        $no.text("No");
+        $no.click(function() {
+          // Ugly hack because variable resolution seems broken in JS....
+          var thisId = $(this).attr('id');
+          var prefix = thisId.substr(0, thisId.lastIndexOf('-'));
+          $("#" + prefix + "-hidden").val('false');
+          $("#" + prefix + "-yes").removeClass('active');
+          $("#" + prefix + "-no").addClass('active');
+        });
+
+        // And wrap them up
+        $wrapper.append($yes).append($no);
+        $p.append($wrapper);
+
         $p.append($yes).append($no);
-	// Add jquery-validation error placeholder (displays errors for
-	// both radio buttons
-	$yes.before('<div id="' + questionId + '-error"><label for="' + questionId + '" class="error" generated="true"></label><div>');
-	$yes.wrap("<label class='checkbox'/>");
-	$yes.after("Yes");
-	$no.wrap("<label class='checkbox'/>");
-	$no.after("No");
+
+        // Finally, add a jquery-validation error placeholder
+        var errorDivHTML = sprintf('<div id="%s-error">', questionId);
+        var labelHTML = sprintf('<label for="%s" class="error" generated="true">',
+          questionId);
+        $hidden.before(errorDivHTML + labelHTML + "</label></div>");
+
+        // And check the current values
+        if(field.name in answerData && answerData[field.name] !== null) {
+          if(answerData[field.name] == true) {
+            $hidden.val('true');
+            $yes.addClass('active');
+          } else {
+            $hidden.val('false');
+            $no.addClass('active');
+          }
+        }
+
         break;
+
 
       case "radio":
         for(var optionIdx = 0; optionIdx < field.radioOptions.length; ++optionIdx) {
@@ -198,7 +230,7 @@ function showQuestion() {
     }
     $questionForm.append($p);
   }
-  $questionForm.validate();
+  $questionForm.validate({ignore: []});
   $("#questions").append($questionForm);
 }
 
@@ -252,8 +284,8 @@ function recordAnswers() {
         break;
 
       case "yesorno":
-	var itemName = 'question-' + field.name;
-	var value = $("input[type=radio][name='" + itemName + "']:checked").val();
+        var itemName = 'question-' + field.name;
+        var value = $("#" + itemName + '-hidden').val();
         if(value == "true")
           answers[globalQuestionId][field.name] = true;
         else
@@ -261,8 +293,8 @@ function recordAnswers() {
         break;
 
       case "radio":
-	var itemName = 'question-' + field.name;
-	var value = $("input[type=radio][name='" + itemName + "']:checked").val();
+        var itemName = 'question-' + field.name;
+        var value = $("#" + itemName + "-hidden").val();
         answers[globalQuestionId][field.name] = value;
         break;
     }
