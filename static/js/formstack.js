@@ -113,18 +113,30 @@ function showQuestion() {
 
     var $input;
     switch(field.type) {
-      case "int":
       case "string":
+        var $inputString = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
+        if(field.name in answerData && answerData[field.name] !== null)
+          $inputString.val(answerData[field.name]);
+        $p.append($inputString);
+        break;
+
+      case "int":
+        var $inputInt = $("<input type='number' min=0 class='" + validationClass + "' id='" + questionId + "'/>");
+        if(field.name in answerData && answerData[field.name] !== null)
+          $inputInt.val(answerData[field.name]);
+        $p.append($inputInt);
+        break;
+
       case "float":
       case "usd":
-        var $input = $("<input type='text' class='" + validationClass + "' id='" + questionId + "'/>");
+        var $inputNumber = $("<input type='number' class='" + validationClass + "' id='" + questionId + "' step='0.01' />");
         if(field.name in answerData && answerData[field.name] !== null)
-          $input.val(answerData[field.name]);
-        $p.append($input);
+          $inputNumber.val(answerData[field.name]);
+        $p.append($inputNumber);
 	// Add a dollar sign to the input box if it is usd
 	if (field.type == "usd") {
-	    $input.wrap("<div class='input-prepend' />");
-	    $input.before("<span class='add-on'>$</span>");
+	    $inputNumber.wrap("<div class='input-prepend' />");
+	    $inputNumber.before("<span class='add-on'>$</span>");
 	}
         break;
 
