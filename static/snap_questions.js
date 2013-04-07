@@ -54,7 +54,8 @@ var questions = { // The actual questions to be asked in json
        "type": "radio",
        "required": true,
        "text": "How often are you paid?",
-       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]},
+       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly", "None"],
+       "popover": "If client has earned income from wages, indicate how often they receive a pay check and how much money is in each check before taxes are taken out"},
       {"name": "check1",
        "type": "usd",
        "required": false,
@@ -82,7 +83,8 @@ var questions = { // The actual questions to be asked in json
        "type": "radio",
        "required": true,
        "text": "How often do you receive unearned income, e.g., SSI, TANF, child support, unemployment, social security?",
-       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly"]},
+       "radioOptions": ["Monthly", "Semimonthly", "Biweekly", "Weekly", "None"],
+       "popover": "If client has unearned income from sources listed, indicate how often they receive a payment and how much money is in each payment before taxes are taken out"},
       {"name": "check1",
        "type": "usd",
        "required": false,
@@ -109,15 +111,18 @@ var questions = { // The actual questions to be asked in json
       {"name": "dependentCare",
        "type": "usd",
        "required": false,
-       "text": "How much do you pay monthly in dependent care costs?"},
+       "text": "How much do you pay monthly in dependent care costs?",
+       "popover": "Enter amount paid each month for dependent care costs."},
       {"name": "childSupport",
        "type": "usd",
        "required": false,
-       "text": "Court ordered child support?"},
+       "text": "Court ordered child support?",
+       "popover": "Enter amount paid each month for child support."},
       {"name": "medicalExpenses",
        "type": "usd",
        "required": false,
-       "text": "Medical expenses for elderly or disabled dependents?"}
+       "text": "Medical expenses for elderly or disabled dependents?",
+       "popover": "Dependent must be over the age of 60 or receiving disability benefits for medical expenses to be taken into account."}
     ],
     "next": function() { return "shelter"; }
   },
@@ -190,12 +195,20 @@ function computeResults() {
     earnedIncome += getPropertyOrZero(answers.income, checkName);
     unearnedIncome += getPropertyOrZero(answers.unearned, checkName);
   }
-  if(answers.income.hasOwnProperty('howOften') && 
-       (answers.income.howOften == 'Weekly' || answers.income.howOften == 'Biweekly'))
-    earnedIncome *= 13/12;
-  if(answers.unearned.hasOwnProperty('howOften') && 
-       (answers.unearned.howOften == 'Weekly' || answers.unearned.howOften == 'Biweekly'))
-    unearnedIncome *= 13/12;
+  if(answers.income.hasOwnProperty('howOften')) {
+    if(answers.income.howOften == 'Weekly' || answers.income.howOften == 'Biweekly') {
+      earnedIncome *= 13/12;
+    } else if(answers.income.howOften == 'None') {
+      earnedIncome = 0.0;
+    }
+  }
+  if(answers.unearned.hasOwnProperty('howOften')) {
+    if(answers.unearned.howOften == 'Weekly' || answers.unearned.howOften == 'Biweekly') {
+      unearnedIncome *= 13/12;
+    } else if(answers.unearned.howOften == 'None') {
+      unearnedIncome = 0.0;
+    }
+  }
 
   var adjustedIncome = 0.0;
   adjustedIncome += 0.8 * earnedIncome;

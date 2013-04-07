@@ -90,7 +90,7 @@ function showQuestion() {
 
   var $questionForm = $("<form id='question-form' action='javascript:askQuestions()' method='get'>");
   var $instructionsWell = $("<div class='well well-small'>");
-  $instructionsWell.text("Click on a question for instructions (and click it again to make instructions go away)");
+  $instructionsWell.text("If a question is blue, then you can click on the text for instructions (and click the text again to make instructions go away)!");
   $questionForm.append($instructionsWell);
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var $p = $("<p>");
@@ -101,6 +101,7 @@ function showQuestion() {
       var popoverOptions = {'placement' : 'bottom'};
       popoverOptions['content'] = field.popover;
       popoverOptions['title'] = "Instructions";
+      $label.css('color', 'blue');
       $label.popover(popoverOptions);
     }
     $p.append($label);
