@@ -20,15 +20,18 @@ var questions = { // The actual questions to be asked in json
       {"name": "totalNumber",
        "type": "int",
        "required": true,
-       "text": "How many people are in your household?"},
+       "text": "How many people are in your household?",
+       "popover": "Enter the number of people that buy and share food together, and who are applying for benefits."},
       {"name": "elderlyOrDisabled",
        "type": "yesorno",
        "required": true,
-       "text": "Is anyone in your household elderly or disabled?"},
+       "text": "Is anyone in your household elderly or disabled?",
+       "popover": "That is, is anyone over the age of 60 or receiving disability benefits?"},
       {"name": "disabledCare",
        "type": "yesorno",
        "required": true,
-       "text": "Does someone in your household pay dependent care expenses?"}
+       "text": "Does someone in your household pay dependent care expenses?",
+       "popover": "This may be child care or the care of an adult."}
     ],
     "next": function() {
       return "resources";

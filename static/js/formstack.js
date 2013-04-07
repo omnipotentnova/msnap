@@ -89,11 +89,21 @@ function showQuestion() {
   var answerData = answers[globalQuestionId]; // In case we hit back
 
   var $questionForm = $("<form id='question-form' action='javascript:askQuestions()' method='get'>");
+  var $instructionsWell = $("<div class='well well-small'>");
+  $instructionsWell.text("Click on a question for instructions (and click it again to make instructions go away)");
+  $questionForm.append($instructionsWell);
   for(var fieldNum = 0; fieldNum < questionData.fields.length; ++fieldNum) {
     var $p = $("<p>");
     var field = questionData.fields[fieldNum];
     var questionId = "question-" + field.name;
-    $p.append($("<label for='" + questionId + "'>").text(field.text));
+    var $label = $("<label for='" + questionId + "'>").text(field.text);
+    if('popover' in field) {
+      var popoverOptions = {'placement' : 'bottom'};
+      popoverOptions['content'] = field.popover;
+      popoverOptions['title'] = "Instructions";
+      $label.popover(popoverOptions);
+    }
+    $p.append($label);
 
     // Set up validation of types with jquery plugin
     var validationClasses = [];
