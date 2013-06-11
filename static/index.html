@@ -13,7 +13,7 @@
   <body>
     <div id="wrap">
       <div id="header">
-        <!-- fill this in -->
+        <img src="img/logo.gif" alt="Met Council Logo" style="padding:3px; width:200px;" />
       </div>
       <div id="content">
         <div id="questions"></div>
@@ -25,6 +25,9 @@
         <a href="#" class="btn btn-large start-over-button" style="display: none">Start Over</a>
       </div>
       <div id="results"></div>
+      <div id="footer" style="text-align: center; font-size:10px; padding:3px">
+        <span id="footerSpan">Disclaimer</span>
+      </div>
     </div>
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script src="js/jquery.validate.min.js"></script>
@@ -34,5 +37,12 @@
     <script src="snap_questions.js"></script>
     <script src="js/sprintf.js"></script>
     <script src="js/formstack.js"></script>
+    <script type="text/javascript">
+      $("#footerSpan").css('color', 'blue')
+                      .popover({'placement' : 'top',
+                                'content'   : 'Eligibility requirements are calculated for New York City from October 1, 2012 to September 30th, 2013. This website is made available by Metropolitan Council on Jewish Poverty intended for the purposes of education and information, not to provide legal eligibility determination for the Supplemental Nutrition Assistance Program (SNAP). By using this website you understand that the SNAP eligibility is determined by the New York City Human Resource Administration (NYCHRA). The website should not be used as a substitute for eligibility determination by NYCHRA.',
+                                'title'     : 'Disclaimer',
+                                'template' : '<div class="popover" style="font-size:10px"><div class="arrow"></div><div class="popover-inner"><h3 class="popover-title" style="display: none"></h3><div class="popover-content" style:><p></p></div></div></div>'});
+    </script>
   </body>
 </html>
