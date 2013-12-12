@@ -81,6 +81,7 @@ function showQuestion() {
   if(globalQuestionId == "DONE") {
     computeResults();
     showResults();
+    loadMaps();
     return;
   }
 
@@ -274,6 +275,7 @@ function showResults() {
   $(".continue-button").hide();
   $(".back-button").hide();
   $(".start-over-button").show();
+  $("#panel").show();
 
   var $resultsTable = $("#resultsTable");
   for(var resultNum=0; resultNum < results.length; ++resultNum) {
@@ -372,6 +374,8 @@ function init() {
       e.preventDefault();
       restart();
     }).hide();
+
+  $("#panel").hide();
 
   $('.back-button')
     .click(function(e) {

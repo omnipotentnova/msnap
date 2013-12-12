@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen" />
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet" />
-    <style type="text/css">
-      /* jquery validate error message style */
-      .error {font-weight: bold; color: red; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="css/maps.css">
   </head>
   <body>
     <div id="wrap">
@@ -28,6 +25,12 @@
       <div id="footer" style="text-align: center; font-size:10px; padding:3px">
         <span id="footerSpan">Disclaimer</span>
       </div>
+      <div id="panel">
+        <input id="address" type="textbox" value="Enter Your Address">
+        <input id="button"  type="button" value="Locate" onclick="codeAddress()">
+      </div>
+      <div id="outputDiv"></div>
+      <div id="map-canvas"></div>
     </div>
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script src="js/jquery.validate.min.js"></script>
@@ -43,6 +46,11 @@
                                 'content'   : 'Eligibility requirements are calculated for New York City from October 1, 2012 to September 30th, 2013. This website is made available by Metropolitan Council on Jewish Poverty intended for the purposes of education and information, not to provide legal eligibility determination for the Supplemental Nutrition Assistance Program (SNAP). By using this website you understand that the SNAP eligibility is determined by the New York City Human Resource Administration (NYCHRA). The website should not be used as a substitute for eligibility determination by NYCHRA.',
                                 'title'     : 'Disclaimer',
                                 'template' : '<div class="popover" style="font-size:10px"><div class="arrow"></div><div class="popover-inner"><h3 class="popover-title" style="display: none"></h3><div class="popover-content" style:><p></p></div></div></div>'});
+
+    </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript"
+            src="geocodemarks.js">
     </script>
   </body>
 </html>
